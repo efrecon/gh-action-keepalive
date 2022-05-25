@@ -12,6 +12,9 @@ on:
 jobs:
   keepalive:
     runs-on: ubuntu-latest
+    permissions:
+      workflows: write
+      contents: write
     steps:
       - name: checkout
         uses: actions/checkout@v3
