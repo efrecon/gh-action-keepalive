@@ -9,11 +9,6 @@ branding:
   color: green
 
 inputs:
-  sleep:
-    description: |
-      Number of seconds to sleep between activity toggle.
-    required: false
-    default: "1"
   token:
     description: |
       Token with enough privileges (repo:* scope) to perform action state
@@ -32,13 +27,21 @@ runs:
   using: composite
   steps:
     -
+      name: Minimal Checkout
+      id: checkout
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ github.repository }}
+        fetch-depth: 1
+    -
       name: Activity Keeper
       id: activator
       shell: bash
+      env:
+        ACTIVITY_GHAPI: ${{ github.api_url }}
       run: |
-        ${{ github.action_path }}/keepalive.sh \
+        ${{ github.action_path }}/activity.sh \
           -t '${{ inputs.token }}' \
-          -s '${{ inputs.sleep }}' \
           ${{ inputs.options }} \
           -- \
             '${{ github.repository }}'
