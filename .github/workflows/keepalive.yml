@@ -12,12 +12,12 @@ jobs:
     steps:
       - name: keepalive
         if: github.event == 'schedule'
-        uses: .
+        uses: ./
         with:
           options: -v
       - name: force keepalive
         if: github.event == 'workflow_dispatch'
-        uses: .
+        uses: ./
         env:
           ACTIVITY_BRANCH: feature/generate-git-activity
         with:
