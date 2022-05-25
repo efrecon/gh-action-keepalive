@@ -44,6 +44,9 @@ runs:
       name: Activity Keeper
       id: activator
       shell: bash
+      permissions:
+        workflows: write
+        contents: write
       env:
         ACTIVITY_GHAPI: ${{ github.api_url }}
       run: |
