@@ -44,4 +44,5 @@ runs:
           -t '${{ inputs.token }}' \
           ${{ inputs.options }} \
           -- \
+            '${{ github.workflow }}' \
             '${{ github.repository }}'
