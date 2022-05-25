@@ -4,7 +4,7 @@ on:
   schedule:
     # Run every sunday at 1:27 UTC
     - cron: '27 1 * * SUN'
-  worflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   keepalive:
@@ -16,7 +16,7 @@ jobs:
         with:
           options: -v
       - name: force keepalive
-        if: github.event == 'worflow_dispatch'
+        if: github.event == 'workflow_dispatch'
         uses: .
         env:
           ACTIVITY_BRANCH: feature/generate-git-activity
