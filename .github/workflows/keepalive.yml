@@ -1,0 +1,25 @@
+name: keepalive
+
+on:
+  schedule:
+    # Run every sunday at 1:27 UTC
+    - cron: '27 1 * * SUN'
+  worflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: keepalive
+        if: github.event == 'schedule'
+        uses: .
+        with:
+          options: -v
+      - name: force keepalive
+        if: github.event == 'worflow_dispatch'
+        uses: .
+        env:
+          ACTIVITY_BRANCH: feature/generate-git-activity
+        with:
+          options: -v
+          timeout: 0  
