@@ -26,6 +26,10 @@ ACTIVITY_WORKFLOWS_PATH=${ACTIVITY_WORKFLOWS_PATH:-".github/workflows"}
 # Activity marker to add/use within workflow YAML to keep track of changes
 ACTIVITY_MARKER=${ACTIVITY_MARKER:-"Last GitHub activity at:"}
 
+# user and email of commit author
+ACTIVITY_AUTHOR_NAME=${ACTIVITY_AUTHOR_NAME:-"github-actions"}
+ACTIVITY_AUTHOR_EMAIL=${ACTIVITY_AUTHOR_EMAIL:-"github-actions@github.com"}
+
 # This uses the comments behind the options to show the help. Not extremly
 # correct, but effective and simple.
 usage() {
@@ -191,6 +195,8 @@ if [ "$elapsed" -gt "$ACTIVITY_TIMEOUT" ]; then
     workflow_mark "$ACTIVITY_WORKFLOW"
 
     # Push the change to git, so to GitHub
+    git config user.name "$ACTIVITY_AUTHOR_NAME"
+    git config user.email "$ACTIVITY_AUTHOR_EMAIL"
     git add "$ACTIVITY_WORKFLOW"
     git commit -m "Forced activity to bypass GH workflows liveness toggling"
     git push
