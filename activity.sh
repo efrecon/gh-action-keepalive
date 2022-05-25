@@ -194,6 +194,7 @@ if [ "$elapsed" -gt "$ACTIVITY_TIMEOUT" ]; then
     git add "$ACTIVITY_WORKFLOW"
     git commit -m "Forced activity to bypass GH workflows liveness toggling"
     git push
+    _verbose "Pushed change to git remote"
   fi
 
   # Change back to the branch that was current if relevant
