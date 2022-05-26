@@ -145,8 +145,13 @@ fi
 
 # Get workflow name
 ACTIVITY_WORKFLOW=$1
+
+# Empty workflow name, then work against the liveness store hidden file. Create
+# it at once to make sure it exists, we won't commit if nothing has happened
+# anyway.
 if [ -z "$ACTIVITY_WORKFLOW" ]; then
   ACTIVITY_WORKFLOW=$ACTIVITY_LIVENESS_STORE
+  touch "$(workflow_path "$ACTIVITY_WORKFLOW")"
 fi
 
 # When no repository is provided, take a good guess at the current one.
