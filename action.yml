@@ -35,8 +35,8 @@ inputs:
       a hidden file within the workflows directory when it is necessary to
       generate activite on the repository to keep it alive. The name of that
       file is controlled by the environment variable `ACTIVITY_LIVENESS_STORE`.
-      You can also pass the name of the workflow instead, e.g. `${{
-      github.workflow }}`, in which case the marker will be added/updated at the
+      You can also pass the name of the workflow instead, e.g. the value of
+      `github.workflow`, in which case the marker will be added/updated at the
       end of the workflow that called the action. This requires a GitHub token
       that is able to change workflows, which the default `GITHUB_TOKEN` cannot
       do.
