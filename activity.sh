@@ -21,13 +21,14 @@ ACTIVITY_BRANCH=${ACTIVITY_BRANCH:-""}
 ACTIVITY_TIMEOUT=${ACTIVITY_TIMEOUT:-"3542400"}
 
 # Where workflow files are located within a repository
-ACTIVITY_WORKFLOWS_PATH=${ACTIVITY_WORKFLOWS_PATH:-".github/workflows"}
+ACTIVITY_WORKFLOWS_DIR=${ACTIVITY_WORKFLOWS_DIR:-".github/workflows"}
 
-# Name of file (inside workflows path) to actualise whenever activity needs to
-# generated onto the repository and no workflow is passed as a parameter.
-ACTIVITY_LIVENESS_STORE=${ACTIVITY_LIVENESS_STORE:-".github_liveness.txt"}
+# Path to file to actualise whenever activity needs to generated onto the
+# repository and no workflow is passed as a parameter.
+ACTIVITY_LIVENESS_PATH=${ACTIVITY_LIVENESS_PATH:-".github/.github_liveness.txt"}
 
-# Activity marker to add/use within workflow YAML to keep track of changes
+# Activity marker to add/use within activity marker file to keep track of
+# changes
 ACTIVITY_MARKER=${ACTIVITY_MARKER:-"Last GitHub activity at:"}
 
 # user and email of commit author
@@ -112,14 +113,20 @@ workflow_name() {
 }
 
 workflow_path() {
-  if printf %s\\n "$1" | grep -Eq '\.ya?ml$' || [ "$1" = "$ACTIVITY_LIVENESS_STORE" ]; then
-    if printf %s\\n "$1" | grep -Fq "$ACTIVITY_WORKFLOWS_PATH"; then
+  if [ -z "$1" ]; then
+    # Empty? Return the path to the liveness activity marker file, making sure
+    # we have a directory and the file exists.
+    mkdir -p "$(dirname "$ACTIVITY_LIVENESS_PATH")"
+    touch "$ACTIVITY_LIVENESS_PATH"
+    printf %s\\n "$ACTIVITY_LIVENESS_PATH"
+  elif printf %s\\n "$1" | grep -Eq '\.ya?ml$'; then
+    if printf %s\\n "$1" | grep -Fq "$ACTIVITY_WORKFLOWS_DIR"; then
       printf %s\\n "$1"
     else
-      printf %s/%s\\n "${ACTIVITY_WORKFLOWS_PATH%/}" "$1"
+      printf %s/%s\\n "${ACTIVITY_WORKFLOWS_DIR%/}" "$1"
     fi
   else
-    find "$ACTIVITY_WORKFLOWS_PATH" -name '*.yml' -o -name '*.yaml' | while IFS=$(printf \\n) read -r path; do
+    find "$ACTIVITY_WORKFLOWS_DIR" -name '*.yml' -o -name '*.yaml' | while IFS=$(printf \\n) read -r path; do
       if [ "$(workflow_name "$path")" = "$1" ]; then
         printf %s\\n "$path"
         break
@@ -145,14 +152,6 @@ fi
 
 # Get workflow name
 ACTIVITY_WORKFLOW=$1
-
-# Empty workflow name, then work against the liveness store hidden file. Create
-# it at once to make sure it exists, we won't commit if nothing has happened
-# anyway.
-if [ -z "$ACTIVITY_WORKFLOW" ]; then
-  ACTIVITY_WORKFLOW=$ACTIVITY_LIVENESS_STORE
-  touch "$(workflow_path "$ACTIVITY_WORKFLOW")"
-fi
 
 # When no repository is provided, take a good guess at the current one.
 if [ "$#" -eq "1" ]; then
@@ -200,7 +199,7 @@ if [ "$elapsed" -gt "$ACTIVITY_TIMEOUT" ]; then
   # we will be pushing a commit onto.
   ACTIVITY_WORKFLOW=$(workflow_path "$ACTIVITY_WORKFLOW")
   if [ -z "$ACTIVITY_WORKFLOW" ] || ! [ -f "$ACTIVITY_WORKFLOW" ]; then
-    _warn "Cannot find workflow $1 (looked in $ACTIVITY_WORKFLOWS_PATH)"
+    _warn "Cannot find workflow $1 (looked in $ACTIVITY_WORKFLOWS_DIR)"
     exit_code=1
   else
     # Add/change marker on the workflow file
