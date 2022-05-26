@@ -202,12 +202,15 @@ if [ "$elapsed" -gt "$ACTIVITY_TIMEOUT" ]; then
     _warn "Cannot find workflow $1 (looked in $ACTIVITY_WORKFLOWS_DIR)"
     exit_code=1
   else
+    # Initialise git and make sure we have all changes
+    git config user.name "$ACTIVITY_AUTHOR_NAME"
+    git config user.email "$ACTIVITY_AUTHOR_EMAIL"
+    git pull -f
+
     # Add/change marker on the workflow file
     workflow_mark "$ACTIVITY_WORKFLOW"
 
     # Push the change to git, so to GitHub
-    git config user.name "$ACTIVITY_AUTHOR_NAME"
-    git config user.email "$ACTIVITY_AUTHOR_EMAIL"
     git add "$ACTIVITY_WORKFLOW"
     git commit -m "Forced activity to bypass GH workflows liveness toggling"
     git push
