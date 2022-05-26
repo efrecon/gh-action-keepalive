@@ -23,6 +23,10 @@ ACTIVITY_TIMEOUT=${ACTIVITY_TIMEOUT:-"3542400"}
 # Where workflow files are located within a repository
 ACTIVITY_WORKFLOWS_PATH=${ACTIVITY_WORKFLOWS_PATH:-".github/workflows"}
 
+# Name of file (inside workflows path) to actualise whenever activity needs to
+# generated onto the repository and no workflow is passed as a parameter.
+ACTIVITY_LIVENESS_STORE=${ACTIVITY_LIVENESS_STORE:-".github_liveness.txt"}
+
 # Activity marker to add/use within workflow YAML to keep track of changes
 ACTIVITY_MARKER=${ACTIVITY_MARKER:-"Last GitHub activity at:"}
 
@@ -108,7 +112,7 @@ workflow_name() {
 }
 
 workflow_path() {
-  if printf %s\\n "$1" | grep -Eq '\.ya?ml$'; then
+  if printf %s\\n "$1" | grep -Eq '\.ya?ml$' || [ "$1" = "$ACTIVITY_LIVENESS_STORE" ]; then
     if printf %s\\n "$1" | grep -Fq "$ACTIVITY_WORKFLOWS_PATH"; then
       printf %s\\n "$1"
     else
@@ -141,6 +145,9 @@ fi
 
 # Get workflow name
 ACTIVITY_WORKFLOW=$1
+if [ -z "$ACTIVITY_WORKFLOW" ]; then
+  ACTIVITY_WORKFLOW=$ACTIVITY_LIVENESS_STORE
+fi
 
 # When no repository is provided, take a good guess at the current one.
 if [ "$#" -eq "1" ]; then
