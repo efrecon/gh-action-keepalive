@@ -23,7 +23,7 @@ ACTIVITY_TIMEOUT=${ACTIVITY_TIMEOUT:-"3542400"}
 # Where workflow files are located within a repository
 ACTIVITY_WORKFLOWS_DIR=${ACTIVITY_WORKFLOWS_DIR:-".github/workflows"}
 
-# Path to file to actualise whenever activity needs to generated onto the
+# Path to file to actualise whenever activity needs to be generated onto the
 # repository and no workflow is passed as a parameter.
 ACTIVITY_LIVENESS_PATH=${ACTIVITY_LIVENESS_PATH:-".github/.github_liveness.txt"}
 
@@ -38,19 +38,21 @@ ACTIVITY_AUTHOR_EMAIL=${ACTIVITY_AUTHOR_EMAIL:-"github-actions@github.com"}
 # This uses the comments behind the options to show the help. Not extremly
 # correct, but effective and simple.
 usage() {
-  echo "$0 keeps alive all workflows of the checked out repository passed as argument" && \
+  echo "$0 keeps alive the github repository passed as 2nd argument (empty for current). 1st arg is name of workflow to use for marker, or empty." && \
     grep "[[:space:]].)\ #" "$0" |
     sed 's/#//' |
     sed -r 's/([a-z])\)/-\1/'
   exit "${1:-0}"
 }
 
-while getopts "t:s:m:vfh-" opt; do
+while getopts "t:s:m:l:vfh-" opt; do
   case "$opt" in
     t) # Personal access token
       ACTIVITY_TOKEN=$OPTARG;;
     m) # Time since last activity to trigger fake commit (in seconds)
       ACTIVITY_TIMEOUT=$OPTARG;;
+    l) # Path to file to create/update with marker when activity needs to be recorded and no workflow is passed as an argument
+      ACTIVITY_LIVENESS_PATH=$OPTARG;;
     v) # Turn on verbosity
       ACTIVITY_VERBOSE=1;;
     h) # Print help and exit

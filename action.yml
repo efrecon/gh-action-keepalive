@@ -1,27 +1,16 @@
 name: Keepalive Workflows
 description: |
-  Turns off and then back all workflows on the repository this action is run on
-  to ensure that they are not automatically disabled after 60 days of
-  inactivity.
+  Automatically generates activity on the default git branch when no activity
+  has been recorded for a longer period of time. This avoids workflows to be
+  disabled by GitHub after 60 days of inactivity. By default, this action uses a
+  hidden file within the `.github` directory whenever git activity is required.
+  The path to that file can be controlled through the `liveness` input.
 author: Emmanuel Frecon <efrecon+github@gmail.com>
 branding:
   icon: activity
   color: green
 
 inputs:
-  token:
-    description: |
-      Token with enough privileges (repo:* scope) to perform action state
-      operations.
-    required: false
-    default: "${{ github.token }}"
-  options:
-    description: |
-      Additional options to keepalive script, e.g. -v to print out additional
-      verbose information. This is a semi-internal input and should only be used
-      for debugging.
-    required: false
-    default: ""
   timeout:
     description: |
       The number of seconds of inactivity on the default branch before
@@ -29,17 +18,40 @@ inputs:
       GitHub inactivity trigger.
     required: false
     default: 3542400
+  liveness:
+    description: |
+      Path (relative to repository) to a file where a marker will be
+      put/actualised whenever activity is required to be generated on the
+      repository. This file is used whenever the `marker` is empty, i.e. in most
+      cases.
+    default: '.github/.github_liveness.txt'
+  token:
+    description: |
+      GitHub token. The default is the default github token, which is enough to
+      perform a git commit onto the default file from `liveness`. If you want to
+      use a workflow such as the activity marker instead, pass a token with
+      enough privileges to change the content of workflows. In that case, you
+      might want to use the current workflow, i.e. the workflow running the
+      action available at `github.workflow`.
+    required: false
+    default: "${{ github.token }}"
+  options:
+    description: |
+      Additional options to `activity.sh` script, e.g. -v to print out
+      additional verbose information. This is a semi-internal input and should
+      only be used for debugging.
+    required: false
+    default: ""
   marker:
     description: |
-      The default is to have an empty marker, in which case this action will use
-      a hidden file within the workflows directory when it is necessary to
-      generate activite on the repository to keep it alive. The name of that
-      file is controlled by the environment variable `ACTIVITY_LIVENESS_STORE`.
-      You can also pass the name of the workflow instead, e.g. the value of
-      `github.workflow`, in which case the marker will be added/updated at the
-      end of the workflow that called the action. This requires a GitHub token
-      that is able to change workflows, which the default `GITHUB_TOKEN` cannot
-      do.
+      Name of workflow to use for activity marker. The default is to have an
+      empty marker, in which case this action will use the file from `liveness`
+      when it is necessary to generate activity on the repository to keep it
+      alive. Instead of an empty marker, you can pass the name of a workflow
+      instead, e.g. the value of `github.workflow`, in which case the marker
+      will be added/updated at the end of the workflow that called the action.
+      This requires a GitHub token that is able to change workflows, which the
+      default `github.token` cannot do.
     required: false
     default: ""
 
@@ -63,6 +75,7 @@ runs:
         ${{ github.action_path }}/activity.sh \
           -t '${{ inputs.token }}' \
           -m '${{ inputs.timeout }}' \
+          -l '${{ inputs.liveness }}' \
           ${{ inputs.options }} \
           -- \
             '${{ inputs.marker }}' \
