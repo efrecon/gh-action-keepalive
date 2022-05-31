@@ -1,17 +1,17 @@
-# Keepalive Workflows
+# Keepalived Workflows
 
 Workflows will be automatically disabled by GitHub after 60 days of [inactivity]
 on the default branch. This action keeps workflows in your repository active by
-automatically generating git activity before the 60 days timeout. The action is
+automatically generating git activity before the 60 days deadline. The action is
 meant to be run from time to time using a [schedule] event. If no authorship
 activity has happened for the past 41 days, the action will generate a commit
 onto the default branch, through writing a date-based marker into a hidden file
 within the `.github` directory. File path, inactivity period, and other
-parameters can be easily controlled through action variables, or environment
-variables.
+parameters can easily be controlled through input parameters, or environment
+variables (for lesser used one).
 
-This is useful, for example, when a project needs to follow the releasing tempo
-of another external project or needs to update badges from time to time.
+This action is useful, for example, when a project needs to follow the release
+tempo of another (external) project or needs to update badges from time to time.
 
   [inactivity]: https://docs.github.com/en/actions/managing-workflow-runs/disabling-and-enabling-a-workflow
   [schedule]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
@@ -38,20 +38,22 @@ jobs:
         uses: efrecon/gh-action-keepalive@main
 ```
 
-You can also run the action as an extra step in an action that would already be
-running from time to time.
+You can also run the action as an extra step in a workflow that would already be
+running from time to time, the period being less important as long as it is long
+enough to be triggered before the 60 days deadline.
 
-This action has good defaults, consult the [action.yml](./action.yml) for a
-complete list of inputs and their usage. In addition to the API that it provides
-through the different available inputs, it is also possible to fine tune the
-behaviour of this action through a set of environment variables. All variables
-start with the `ACTIVITY_` prefix. The value of inputs always have precedence
-over the content of the variables. Available variables are listed at the
-beginning of the main implementation [script](./activity.sh).
+This action has good defaults, consult the file [action.yml](./action.yml) for a
+complete list of input parameters and their usage. In addition to the API that
+it provides through the different available parameters, it is also possible to
+fine tune the behaviour of this action through a set of environment variables.
+All variables start with the `ACTIVITY_` prefix. The value of input parameters
+always have precedence over the content of the variables. Available variables
+are listed, together with a brief explanation at the beginning of the main
+implementation [script](./activity.sh).
 
 ## History
 
-This implementation is the second **attempt** at keeping alive workflows over
+This implementation is the **second** attempt at keeping alive workflows over
 longer period of time. A previous version was toggling twice the activity state
-of all workflows. But this was a strategy that was not able to bypass GitHub's
-limitation.
+of all workflows. But this strategy turned out not being able to bypass GitHub's
+deadline.
